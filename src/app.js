@@ -22,26 +22,52 @@ app.use(
 );
 
 // CORS configuration
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:3000',
-  process.env.ADMIN_URL || 'http://localhost:3000',
+const defaultAllowedOrigins = [
+  'https://jodhpur-voyage.vercel.app',
+  'http://localhost:3000',
   'http://localhost:3001',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'http://localhost:5174'
 ];
+
+const parseEnvOrigins = (envVar) => {
+  if (!envVar) return [];
+  return envVar
+    .split(',')
+    .map((url) => url.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+};
+
+const customOrigins = [
+  ...parseEnvOrigins(process.env.CLIENT_URL),
+  ...parseEnvOrigins(process.env.ADMIN_URL)
+];
+
+const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...customOrigins]));
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, '');
+
+      const isAllowed =
+        allowedOrigins.includes(normalizedOrigin) ||
+        /^https:\/\/jodhpur-voyage.*\.vercel\.app$/.test(normalizedOrigin) ||
+        process.env.NODE_ENV === 'development';
+
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error('Blocked by CORS security policy'));
+        callback(new Error(`Blocked by CORS security policy: ${origin}`));
       }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Set-Cookie']
   })
 );
 

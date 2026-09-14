@@ -9,7 +9,7 @@
 - **Base URL:** `http://localhost:5000/api/v1`
 - **Server Health Check:** `GET http://localhost:5000/api/v1/health`
 - **Content-Type:** `application/json` (except file uploads which use `multipart/form-data`)
-- **CORS Allowed Origins:** `http://localhost:3000`, `http://localhost:3001`, `http://localhost:5173`
+- **CORS Allowed Origins:** `https://jodhpur-voyage.vercel.app`, `http://localhost:3000`, `http://localhost:3001`, `http://localhost:5173`
 
 ---
 
