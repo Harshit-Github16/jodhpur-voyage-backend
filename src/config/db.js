@@ -3,28 +3,42 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  try {
+  if (cached.conn && mongoose.connection.readyState >= 1) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
     const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/jodhpur_voyage';
-    const conn = await mongoose.connect(mongoUri, {
-      autoIndex: true,
-      serverSelectionTimeoutMS: 15000, // 15 seconds timeout
-    });
-
-    console.log(`✅ MongoDB Connected: ${conn.connection.host} [Database: ${conn.connection.name}]`);
-
-    mongoose.connection.on('error', (err) => {
-      console.error(`❌ MongoDB connection error: ${err.message}`);
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️ MongoDB disconnected. Attempting reconnection...');
-    });
     
-    return conn;
+    cached.promise = mongoose
+      .connect(mongoUri, {
+        autoIndex: true,
+        serverSelectionTimeoutMS: 10000
+      })
+      .then((mongooseInstance) => {
+        console.log(`✅ MongoDB Connected: ${mongooseInstance.connection.host} [Database: ${mongooseInstance.connection.name}]`);
+        return mongooseInstance;
+      })
+      .catch((err) => {
+        cached.promise = null;
+        console.error(`❌ MongoDB connection error: ${err.message}`);
+        throw err;
+      });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
   } catch (error) {
+    cached.promise = null;
     console.error(`❌ Error connecting to MongoDB: ${error.message}`);
-    process.exit(1);
+    throw error;
   }
 };
 
