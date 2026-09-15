@@ -3,9 +3,9 @@ import slugify from '../utils/slugify.js';
 
 const itinerarySchema = new mongoose.Schema(
   {
-    day: { type: Number, required: true },
+    day: { type: Number, default: 1 },
     title: { type: String, required: true },
-    desc: { type: String, required: true },
+    desc: { type: String, default: '' },
     meals: { type: String, default: '' },
     stay: { type: String, default: '' }
   },
@@ -37,12 +37,12 @@ const tourSchema = new mongoose.Schema(
     cityId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'City',
-      required: [true, 'City ID is required'],
+      required: false,
       index: true
     },
     cityName: {
       type: String,
-      required: true
+      default: 'Jodhpur'
     },
     category: {
       type: String,
@@ -61,7 +61,7 @@ const tourSchema = new mongoose.Schema(
     },
     duration: {
       type: String,
-      required: [true, 'Duration is required']
+      default: '1 Day'
     }, // e.g. "3 Days / 2 Nights"
     groupSize: {
       type: String,
@@ -69,18 +69,18 @@ const tourSchema = new mongoose.Schema(
     },
     location: {
       type: String,
-      required: [true, 'Location is required']
+      default: 'Jodhpur, Rajasthan'
     },
     image: {
       type: String,
-      required: [true, 'Main image URL is required']
+      default: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800'
     },
     gallery: [{
       type: String
     }],
     overview: {
       type: String,
-      required: [true, 'Overview is required']
+      default: ''
     },
     highlights: [{
       type: String

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Tour from '../models/Tour.js';
 import City from '../models/City.js';
 import ApiError from '../utils/ApiError.js';
@@ -168,23 +169,54 @@ export const createTour = asyncHandler(async (req, res) => {
     tourData.slug = slugify(tourData.title);
   }
 
-  const existing = await Tour.findOne({
-    $or: [{ title: tourData.title }, { slug: tourData.slug }]
-  });
-  if (existing) {
-    throw new ApiError(STATUS_CODES.CONFLICT, 'Tour package with this title or slug already exists');
+  // Ensure unique slug
+  let slug = tourData.slug;
+  let counter = 1;
+  while (await Tour.findOne({ slug })) {
+    slug = `${tourData.slug}-${counter++}`;
+  }
+  tourData.slug = slug;
+
+  // Ensure overview is populated from description if needed
+  if (!tourData.overview && tourData.description) {
+    tourData.overview = tourData.description;
   }
 
-  const city = await City.findById(tourData.cityId);
-  if (!city) {
-    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Valid City is required for Tour');
+  // City Resolution: Try ObjectId, then slug, then name, then fallback
+  let city = null;
+  if (tourData.cityId && mongoose.Types.ObjectId.isValid(tourData.cityId)) {
+    city = await City.findById(tourData.cityId);
   }
-  tourData.cityName = city.name;
+
+  if (!city && tourData.cityId) {
+    const cleanSlug = tourData.cityId.replace(/^city-/, '').toLowerCase();
+    city = await City.findOne({
+      $or: [
+        { slug: cleanSlug },
+        { slug: tourData.cityId.toLowerCase() },
+        { name: new RegExp(`^${tourData.cityName || cleanSlug}$`, 'i') }
+      ]
+    });
+  }
+
+  if (!city && tourData.cityName) {
+    city = await City.findOne({ name: new RegExp(`^${tourData.cityName}$`, 'i') });
+  }
+
+  if (!city) {
+    city = await City.findOne();
+  }
+
+  if (city) {
+    tourData.cityId = city._id;
+    tourData.cityName = city.name;
+  }
 
   const tour = await Tour.create(tourData);
 
-  // Increment city package count
-  await City.findByIdAndUpdate(tourData.cityId, { $inc: { packagesCount: 1 } });
+  if (city) {
+    await City.findByIdAndUpdate(city._id, { $inc: { packagesCount: 1 } });
+  }
 
   return res.status(STATUS_CODES.CREATED).json(
     new ApiResponse(STATUS_CODES.CREATED, tour, 'Tour created successfully')
@@ -200,8 +232,22 @@ export const updateTour = asyncHandler(async (req, res) => {
   }
 
   if (updates.cityId) {
-    const city = await City.findById(updates.cityId);
+    let city = null;
+    if (mongoose.Types.ObjectId.isValid(updates.cityId)) {
+      city = await City.findById(updates.cityId);
+    }
+    if (!city) {
+      const cleanSlug = updates.cityId.replace(/^city-/, '').toLowerCase();
+      city = await City.findOne({
+        $or: [
+          { slug: cleanSlug },
+          { slug: updates.cityId.toLowerCase() },
+          { name: new RegExp(`^${updates.cityName || cleanSlug}$`, 'i') }
+        ]
+      });
+    }
     if (city) {
+      updates.cityId = city._id;
       updates.cityName = city.name;
     }
   }
