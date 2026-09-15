@@ -29,26 +29,30 @@ const blogSchema = new mongoose.Schema(
     },
     excerpt: {
       type: String,
-      required: [true, 'Excerpt is required']
+      default: ''
     },
     content: {
       type: String,
-      required: [true, 'Content is required']
+      default: ''
     }, // HTML or Markdown
     coverImage: {
       type: String,
-      required: [true, 'Cover image is required']
+      default: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=1200'
     },
     category: {
       type: String,
-      required: [true, 'Category is required']
+      default: 'Travel Guide'
     }, // e.g. "Travel Guide", "Food & Culture", "Heritage"
     tags: [{
       type: String
     }],
     author: {
       type: authorSchema,
-      required: true
+      default: () => ({
+        name: 'Harshit Sharma',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        role: 'Travel Specialist'
+      })
     },
     readTime: {
       type: String,

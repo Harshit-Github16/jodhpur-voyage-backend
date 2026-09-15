@@ -115,13 +115,13 @@ export const createBlog = asyncHandler(async (req, res) => {
     blogData.slug = slugify(blogData.title);
   }
 
-  const existing = await Blog.findOne({
-    $or: [{ title: blogData.title }, { slug: blogData.slug }]
-  });
-
-  if (existing) {
-    throw new ApiError(STATUS_CODES.CONFLICT, 'A blog with this title or slug already exists');
+  // Ensure unique slug
+  let slug = blogData.slug;
+  let counter = 1;
+  while (await Blog.findOne({ slug })) {
+    slug = `${blogData.slug}-${counter++}`;
   }
+  blogData.slug = slug;
 
   if (!blogData.author) {
     blogData.author = {
