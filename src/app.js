@@ -18,99 +18,23 @@ const app = express();
 // Security HTTP Headers
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' }
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: false
   })
 );
 
-// CORS configuration
-const parseEnvOrigins = (envVar) => {
-  if (!envVar) return [];
-  return envVar
-    .split(',')
-    .map((url) => url.trim().replace(/\/$/, ''))
-    .filter(Boolean);
-};
-
-const defaultAllowedOrigins = [
-  'https://jodhpur-voyage.vercel.app',
-  'https://jodhpur-voyage-frontend.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:5175',
-  'http://localhost:4173',
-  'http://localhost:8080',
-  'http://127.0.0.1:3000',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:5174',
-  'http://127.0.0.1:5175'
-];
-
-const customOrigins = [
-  ...parseEnvOrigins(process.env.CLIENT_URL),
-  ...parseEnvOrigins(process.env.ADMIN_URL),
-  ...parseEnvOrigins(process.env.CORS_ORIGIN),
-  ...parseEnvOrigins(process.env.ALLOWED_ORIGINS)
-];
-
-const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...customOrigins]));
-
+// Foolproof dynamic CORS configuration (supports credentials, all origins, all headers)
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-
-    const normalizedOrigin = origin.replace(/\/$/, '');
-
-    // Allow all localhost and 127.0.0.1 ports
-    const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin);
-    // Allow all Vercel, Netlify preview & production URLs
-    const isVercel = /^https:\/\/.*\.vercel\.app$/.test(normalizedOrigin);
-    const isNetlify = /^https:\/\/.*\.netlify\.app$/.test(normalizedOrigin);
-    const isExplicitlyAllowed =
-      allowedOrigins.includes(normalizedOrigin) ||
-      allowedOrigins.includes('*') ||
-      process.env.CORS_ORIGIN === '*';
-
-    if (
-      isExplicitlyAllowed ||
-      isLocalhost ||
-      isVercel ||
-      isNetlify ||
-      process.env.NODE_ENV !== 'production'
-    ) {
-      return callback(null, true);
-    }
-
-    // Default to allowing origin dynamically to prevent frontend blocking
-    return callback(null, true);
+    // Dynamically allow any origin that makes the request
+    return callback(null, origin || true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: [
-    'Origin',
-    'X-Requested-With',
-    'Content-Type',
-    'Accept',
-    'Authorization',
-    'X-Access-Token',
-    'Cache-Control',
-    'Pragma',
-    'X-CSRF-Token',
-    'Accept-Version',
-    'Content-Length',
-    'Content-MD5',
-    'Date',
-    'X-Api-Version'
-  ],
-  exposedHeaders: ['Set-Cookie', 'Authorization'],
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 
 // Request Logging
