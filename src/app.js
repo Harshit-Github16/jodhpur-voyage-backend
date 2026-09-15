@@ -97,13 +97,21 @@ const corsOptions = {
     'Authorization',
     'X-Access-Token',
     'Cache-Control',
-    'Pragma'
+    'Pragma',
+    'X-CSRF-Token',
+    'Accept-Version',
+    'Content-Length',
+    'Content-MD5',
+    'Date',
+    'X-Api-Version'
   ],
   exposedHeaders: ['Set-Cookie', 'Authorization'],
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 
 // Request Logging
 if (process.env.NODE_ENV === 'development') {
