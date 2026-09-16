@@ -7,7 +7,7 @@ import cleanUpdates from '../utils/cleanUpdates.js';
 import { STATUS_CODES } from '../constants/statusCodes.js';
 
 export const getBlogs = asyncHandler(async (req, res) => {
-  const { category, tag, search, status = 'Published', featured, page = 1, limit = 10 } = req.query;
+  const { category, tag, search, status = 'Published', featured, page, limit } = req.query;
   const filter = {};
 
   if (status && status !== 'All') {
@@ -36,11 +36,17 @@ export const getBlogs = asyncHandler(async (req, res) => {
   }
 
   const pageNum = parseInt(page, 10) || 1;
-  const limitNum = parseInt(limit, 10) || 10;
-  const skip = (pageNum - 1) * limitNum;
+  const isAll = !limit || limit === 'all' || limit === '0';
+  const limitNum = isAll ? 0 : parseInt(limit, 10) || 0;
+  const skip = limitNum > 0 ? (pageNum - 1) * limitNum : 0;
+
+  const query = Blog.find(filter).sort({ publishedAt: -1, createdAt: -1 });
+  if (limitNum > 0) {
+    query.skip(skip).limit(limitNum);
+  }
 
   const [blogs, total] = await Promise.all([
-    Blog.find(filter).sort({ publishedAt: -1, createdAt: -1 }).skip(skip).limit(limitNum).lean(),
+    query.lean(),
     Blog.countDocuments(filter)
   ]);
 
@@ -62,13 +68,12 @@ export const getBlogs = asyncHandler(async (req, res) => {
     createdAt: b.createdAt
   }));
 
-
   return res.status(STATUS_CODES.OK).json({
     success: true,
     count: formatted.length,
     total,
     page: pageNum,
-    totalPages: Math.ceil(total / limitNum) || 1,
+    totalPages: limitNum > 0 ? Math.ceil(total / limitNum) || 1 : 1,
     data: formatted
   });
 });
