@@ -8,11 +8,24 @@ const router = Router();
 // Allow authenticated staff as well as guests (for reviews/enquiry photos)
 router.use(optionalAuth);
 
+// Info / Health check for upload service
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Image upload service is active. Send POST with multipart/form-data (field: image or file)',
+    endpoints: {
+      single: 'POST /api/v1/upload (field: image)',
+      multiple: 'POST /api/v1/upload/multiple (field: images)'
+    }
+  });
+});
+
 // Single image upload routes
 router.post('/', uploadSingleImage('image'), uploadSingle);
 router.post('/single', uploadSingleImage('image'), uploadSingle);
 router.post('/image', uploadSingleImage('image'), uploadSingle);
 router.post('/file', uploadSingleImage('image'), uploadSingle);
+
 
 // Multiple image upload routes
 router.post('/multiple', uploadMultipleImages('images', 10), uploadMultiple);
