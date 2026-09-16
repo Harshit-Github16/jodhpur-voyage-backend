@@ -184,3 +184,17 @@ export const deleteBlog = asyncHandler(async (req, res) => {
   });
 });
 
+export const syncWordPress = asyncHandler(async (req, res) => {
+  const { syncWordPressBlogs } = await import('../seeders/syncLiveBlogs.js');
+  const blogs = await syncWordPressBlogs();
+
+  return res.status(STATUS_CODES.OK).json(
+    new ApiResponse(
+      STATUS_CODES.OK,
+      { count: blogs?.length || 0 },
+      `Successfully synced ${blogs?.length || 0} live blogs from WordPress`
+    )
+  );
+});
+
+

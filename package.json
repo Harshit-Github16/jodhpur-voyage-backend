@@ -7,8 +7,10 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed": "node src/seeders/seed.js"
+    "seed": "node src/seeders/seed.js",
+    "sync-blogs": "node src/seeders/syncLiveBlogs.js"
   },
+
   "keywords": [
     "nodejs",
     "express",
