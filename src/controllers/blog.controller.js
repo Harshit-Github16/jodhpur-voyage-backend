@@ -49,6 +49,7 @@ export const getBlogs = asyncHandler(async (req, res) => {
     title: b.title,
     slug: b.slug,
     excerpt: b.excerpt,
+    content: b.content || '',
     coverImage: b.coverImage,
     category: b.category,
     tags: b.tags || [],
@@ -60,6 +61,7 @@ export const getBlogs = asyncHandler(async (req, res) => {
     publishedAt: b.publishedAt,
     createdAt: b.createdAt
   }));
+
 
   return res.status(STATUS_CODES.OK).json({
     success: true,
