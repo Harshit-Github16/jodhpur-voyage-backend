@@ -39,16 +39,16 @@ export const getDashboardMetrics = asyncHandler(async (req, res) => {
   ]);
 
   const totalRevenue = revenueAgg[0]?.total || 0;
-  const averageRating = reviewsAgg[0]?.avg ? Math.round(reviewsAgg[0].avg * 100) / 100 : 4.9;
+  const averageRating = reviewsAgg[0]?.avg ? Math.round(reviewsAgg[0].avg * 100) / 100 : 0;
 
   return res.status(STATUS_CODES.OK).json(
     new ApiResponse(
       STATUS_CODES.OK,
       {
         totalRevenue,
-        revenueGrowth: '+18.4%',
+        revenueGrowth: totalRevenue > 0 ? '+0%' : '0%',
         totalBookings,
-        bookingsGrowth: '+12.1%',
+        bookingsGrowth: totalBookings > 0 ? '+0%' : '0%',
         totalCustomers,
         activePackages,
         totalCities,
@@ -123,8 +123,8 @@ export const getRevenueTrend = asyncHandler(async (req, res) => {
     const entry = aggMap.get(key);
     return {
       month: m.name,
-      revenue: entry ? entry.revenue : Math.floor(150000 + Math.random() * 200000),
-      bookings: entry ? entry.bookings : Math.floor(8 + Math.random() * 15)
+      revenue: entry ? entry.revenue : 0,
+      bookings: entry ? entry.bookings : 0
     };
   });
 
@@ -145,27 +145,20 @@ export const getPopularityBreakdown = asyncHandler(async (req, res) => {
     }
   ]);
 
-  const totalBookingsAll = categoryAgg.reduce((acc, c) => acc + (c.totalBookings || 1), 0) || 1;
+  const totalBookingsAll = categoryAgg.reduce((acc, c) => acc + (c.totalBookings || 0), 0) || 0;
 
   const data = categoryAgg.map((cat) => {
-    const percentage = Math.round(((cat.totalBookings || 1) / totalBookingsAll) * 100);
+    const percentage = totalBookingsAll > 0 ? Math.round(((cat.totalBookings || 0) / totalBookingsAll) * 100) : 0;
     return {
       category: cat._id,
       percentage,
       count: cat.count,
-      revenue: (cat.totalBookings || 2) * 24500
+      revenue: (cat.totalBookings || 0) * 24500
     };
   });
 
-  // Default fallback categories if no tours in db
-  const defaultData = [
-    { category: 'Royal Heritage', percentage: 42, revenue: 1029000 },
-    { category: 'Desert Safari', percentage: 30, revenue: 735000 },
-    { category: 'Culture & Food', percentage: 18, revenue: 441000 },
-    { category: 'Photography & Walks', percentage: 10, revenue: 245000 }
-  ];
-
   return res.status(STATUS_CODES.OK).json(
-    new ApiResponse(STATUS_CODES.OK, data.length > 0 ? data : defaultData, 'Category popularity breakdown retrieved')
+    new ApiResponse(STATUS_CODES.OK, data, 'Category popularity breakdown retrieved')
   );
 });
+
