@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import apiRouter from './routes/index.js';
@@ -14,6 +16,9 @@ import { generalLimiter } from './middlewares/rateLimiter.middleware.js';
 dotenv.config();
 
 const app = express();
+
+// Enable Response Compression (Gzip / Deflate) for blazing fast APIs
+app.use(compression());
 
 // Security HTTP Headers
 app.use(
@@ -42,9 +47,9 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Body parsing middlewares
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing middlewares (high limit for large uploads and base64 strings)
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
@@ -66,15 +71,18 @@ app.get('/', (req, res) => {
   });
 });
 
-// Database connection middleware (ensures active connection in serverless & container environments)
+// Database connection middleware (fast check: only connect if readyState !== 1)
 app.use(async (req, res, next) => {
   try {
-    await connectDB();
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
     next();
   } catch (error) {
     next(error);
   }
 });
+
 
 // API Routes Mounting
 app.use('/api/v1', apiRouter);

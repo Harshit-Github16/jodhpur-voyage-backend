@@ -21,6 +21,9 @@ router.post('/', sensitiveLimiter, validate(createEnquirySchema), createEnquiry)
 router.get('/', protect, authorizeRoles(...STAFF_ROLES), getEnquiries);
 router.get('/:id', protect, authorizeRoles(...STAFF_ROLES), getEnquiryById);
 router.patch('/:id/status', protect, authorizeRoles(...STAFF_ROLES), validate(updateEnquiryStatusSchema), updateEnquiryStatus);
-router.delete('/:id', protect, authorizeRoles(ROLES.SUPER_ADMIN), deleteEnquiry);
+router.put('/:id/status', protect, authorizeRoles(...STAFF_ROLES), validate(updateEnquiryStatusSchema), updateEnquiryStatus);
+router.delete('/:id', protect, authorizeRoles(...STAFF_ROLES), deleteEnquiry);
 
 export default router;
+
+

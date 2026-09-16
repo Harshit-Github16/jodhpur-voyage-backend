@@ -15,8 +15,9 @@ export const loginSchema = z.object({
 export const updateProfileSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   phone: z.string().optional(),
-  avatar: z.string().url().optional()
+  avatar: z.string().optional()
 });
+
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),

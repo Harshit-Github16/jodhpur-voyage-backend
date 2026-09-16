@@ -10,32 +10,50 @@ const reviewSchema = new mongoose.Schema(
     tourTitle: {
       type: String
     },
+    packageTitle: {
+      type: String
+    },
+    tourDate: {
+      type: String,
+      default: ''
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
     authorName: {
       type: String,
-      required: [true, 'Author name is required'],
+      default: 'Traveler',
+      trim: true
+    },
+    customerName: {
+      type: String,
       trim: true
     },
     authorAvatar: {
       type: String,
       default: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
     },
+    customerAvatar: {
+      type: String
+    },
     authorLocation: {
       type: String,
       default: 'India'
+    },
+    customerLocation: {
+      type: String
     },
     rating: {
       type: Number,
       required: [true, 'Rating is required'],
       min: 1,
-      max: 5
+      max: 5,
+      default: 5
     },
     title: {
       type: String,
-      required: [true, 'Review title is required']
+      default: 'Amazing experience in Rajasthan!'
     },
     comment: {
       type: String,
@@ -54,6 +72,7 @@ const reviewSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     }
+
   },
   {
     timestamps: true,

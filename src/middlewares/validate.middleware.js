@@ -3,13 +3,10 @@ import { STATUS_CODES } from '../constants/statusCodes.js';
 
 export const validate = (schema) => (req, res, next) => {
   try {
-    const dataToValidate = {};
-    if (schema.body) dataToValidate.body = req.body;
-    if (schema.query) dataToValidate.query = req.query;
-    if (schema.params) dataToValidate.params = req.params;
+    if (!schema) return next();
 
-    if (schema.shape) {
-      // Direct schema passed for body
+    // Check if schema is a direct Zod Schema (has .safeParse method)
+    if (typeof schema.safeParse === 'function') {
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) {
         const errorMessages = parsed.error.issues.map(
@@ -22,7 +19,7 @@ export const validate = (schema) => (req, res, next) => {
       req.body = parsed.data;
     } else {
       // Object containing body/query/params schemas
-      if (schema.body) {
+      if (schema.body && typeof schema.body.safeParse === 'function') {
         const parsed = schema.body.safeParse(req.body);
         if (!parsed.success) {
           const errors = parsed.error.issues.map(
@@ -32,7 +29,7 @@ export const validate = (schema) => (req, res, next) => {
         }
         req.body = parsed.data;
       }
-      if (schema.query) {
+      if (schema.query && typeof schema.query.safeParse === 'function') {
         const parsed = schema.query.safeParse(req.query);
         if (!parsed.success) {
           const errors = parsed.error.issues.map(
@@ -42,7 +39,7 @@ export const validate = (schema) => (req, res, next) => {
         }
         req.query = parsed.data;
       }
-      if (schema.params) {
+      if (schema.params && typeof schema.params.safeParse === 'function') {
         const parsed = schema.params.safeParse(req.params);
         if (!parsed.success) {
           const errors = parsed.error.issues.map(
@@ -61,3 +58,4 @@ export const validate = (schema) => (req, res, next) => {
 };
 
 export default validate;
+

@@ -22,10 +22,11 @@ const fileFilter = (req, file, cb) => {
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB maximum file size
+    fileSize: 1024 * 1024 * 1024 // 1GB (no practical limit)
   },
   fileFilter
 });
+
 
 export const uploadSingleImage = (fieldName = 'image') => upload.single(fieldName);
 export const uploadMultipleImages = (fieldName = 'images', maxCount = 10) =>

@@ -241,3 +241,24 @@ export const cancelBooking = asyncHandler(async (req, res) => {
     )
   );
 });
+
+export const deleteBooking = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const booking = await Booking.findByIdAndDelete(id);
+
+  if (!booking) {
+    throw new ApiError(STATUS_CODES.NOT_FOUND, 'Booking record not found');
+  }
+
+  // Decrement total bookings if it had a tour
+  if (booking.tourId) {
+    await Tour.findByIdAndUpdate(booking.tourId, { $inc: { totalBookings: -1 } });
+  }
+
+  return res.status(STATUS_CODES.OK).json({
+    success: true,
+    message: 'Booking deleted successfully',
+    deletedId: id
+  });
+});
+

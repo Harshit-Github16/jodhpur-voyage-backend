@@ -25,6 +25,9 @@ router
 router
   .route('/:id')
   .put(protect, authorizeRoles(...ADMIN_ROLES), validate(updateCitySchema), updateCity)
-  .delete(protect, authorizeRoles(ROLES.SUPER_ADMIN), deleteCity);
+  .patch(protect, authorizeRoles(...ADMIN_ROLES), validate(updateCitySchema), updateCity)
+  .delete(protect, authorizeRoles(...ADMIN_ROLES), deleteCity);
 
 export default router;
+
+

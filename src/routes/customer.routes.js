@@ -13,13 +13,17 @@ import { ROLES, ADMIN_ROLES } from '../constants/roles.js';
 
 const router = Router();
 
-// Customer list
+// Customer list & delete
 router.get('/customers', protect, authorizeRoles(...ADMIN_ROLES), getCustomers);
+router.delete('/customers/:id', protect, authorizeRoles(...ADMIN_ROLES), deleteStaff);
 
 // Staff management
-router.get('/users/staff', protect, authorizeRoles(ROLES.SUPER_ADMIN), getStaffList);
-router.post('/users/staff', protect, authorizeRoles(ROLES.SUPER_ADMIN), validate(createStaffSchema), createStaff);
-router.patch('/users/:id/status', protect, authorizeRoles(ROLES.SUPER_ADMIN), toggleUserStatus);
-router.delete('/users/:id', protect, authorizeRoles(ROLES.SUPER_ADMIN), deleteStaff);
+router.get('/users/staff', protect, authorizeRoles(...ADMIN_ROLES), getStaffList);
+router.post('/users/staff', protect, authorizeRoles(...ADMIN_ROLES), validate(createStaffSchema), createStaff);
+router.patch('/users/:id/status', protect, authorizeRoles(...ADMIN_ROLES), toggleUserStatus);
+router.put('/users/:id/status', protect, authorizeRoles(...ADMIN_ROLES), toggleUserStatus);
+router.delete('/users/:id', protect, authorizeRoles(...ADMIN_ROLES), deleteStaff);
 
 export default router;
+
+

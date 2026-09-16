@@ -28,6 +28,9 @@ router
 router
   .route('/:id')
   .put(protect, authorizeRoles(...ADMIN_ROLES), validate(updateCategorySchema), updateCategory)
-  .delete(protect, authorizeRoles(ROLES.SUPER_ADMIN), deleteCategory);
+  .patch(protect, authorizeRoles(...ADMIN_ROLES), validate(updateCategorySchema), updateCategory)
+  .delete(protect, authorizeRoles(...ADMIN_ROLES), deleteCategory);
 
 export default router;
+
+

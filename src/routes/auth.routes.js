@@ -26,6 +26,9 @@ router.post('/refresh', refreshToken);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, validate(updateProfileSchema), updateProfile);
+router.patch('/profile', protect, validate(updateProfileSchema), updateProfile);
 router.put('/change-password', protect, validate(changePasswordSchema), changePassword);
+router.patch('/change-password', protect, validate(changePasswordSchema), changePassword);
 
 export default router;
+

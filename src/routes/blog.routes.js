@@ -25,6 +25,8 @@ router
 router
   .route('/:id')
   .put(protect, authorizeRoles(...STAFF_ROLES), validate(updateBlogSchema), updateBlog)
+  .patch(protect, authorizeRoles(...STAFF_ROLES), validate(updateBlogSchema), updateBlog)
   .delete(protect, authorizeRoles(ROLES.SUPER_ADMIN, ROLES.ADMIN), deleteBlog);
 
 export default router;
+

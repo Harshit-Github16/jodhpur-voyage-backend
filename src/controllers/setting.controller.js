@@ -1,6 +1,7 @@
 import Setting from '../models/Setting.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import cleanUpdates from '../utils/cleanUpdates.js';
 import { STATUS_CODES } from '../constants/statusCodes.js';
 
 export const getSettings = asyncHandler(async (req, res) => {
@@ -27,16 +28,16 @@ export const getSettings = asyncHandler(async (req, res) => {
 });
 
 export const updateSettings = asyncHandler(async (req, res) => {
-  let settings = await Setting.findOne();
+  const updates = cleanUpdates(req.body);
 
-  if (!settings) {
-    settings = await Setting.create(req.body);
-  } else {
-    Object.assign(settings, req.body);
-    await settings.save();
-  }
+  const settings = await Setting.findOneAndUpdate(
+    {},
+    { $set: updates },
+    { new: true, upsert: true, setDefaultsOnInsert: true }
+  );
 
   return res.status(STATUS_CODES.OK).json(
     new ApiResponse(STATUS_CODES.OK, settings, 'Site settings updated successfully')
   );
 });
+

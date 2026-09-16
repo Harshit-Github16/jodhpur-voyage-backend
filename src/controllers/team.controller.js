@@ -2,7 +2,9 @@ import Team from '../models/Team.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
+import cleanUpdates from '../utils/cleanUpdates.js';
 import { STATUS_CODES } from '../constants/statusCodes.js';
+
 
 export const getTeam = asyncHandler(async (req, res) => {
   const team = await Team.find({ status: 'Active' }).sort({ order: 1, createdAt: 1 }).lean();
@@ -70,7 +72,7 @@ export const createTeamMember = asyncHandler(async (req, res) => {
 
 export const updateTeamMember = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const updates = req.body;
+  const updates = cleanUpdates(req.body);
 
   const member = await Team.findByIdAndUpdate(id, updates, {
     new: true,
@@ -100,3 +102,4 @@ export const deleteTeamMember = asyncHandler(async (req, res) => {
     deletedId: id
   });
 });
+

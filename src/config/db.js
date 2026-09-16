@@ -9,6 +9,11 @@ if (!cached) {
 }
 
 const connectDB = async () => {
+  // Fast path: if already connected, return immediately
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
   if (cached.conn && mongoose.connection.readyState >= 1) {
     return cached.conn;
   }
@@ -18,11 +23,13 @@ const connectDB = async () => {
     
     cached.promise = mongoose
       .connect(mongoUri, {
-        autoIndex: true,
-        serverSelectionTimeoutMS: 10000
+        maxPoolSize: 20,
+        minPoolSize: 2,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        family: 4
       })
       .then((mongooseInstance) => {
-        console.log(`✅ MongoDB Connected: ${mongooseInstance.connection.host} [Database: ${mongooseInstance.connection.name}]`);
         return mongooseInstance;
       })
       .catch((err) => {
@@ -37,9 +44,9 @@ const connectDB = async () => {
     return cached.conn;
   } catch (error) {
     cached.promise = null;
-    console.error(`❌ Error connecting to MongoDB: ${error.message}`);
     throw error;
   }
 };
 
 export default connectDB;
+

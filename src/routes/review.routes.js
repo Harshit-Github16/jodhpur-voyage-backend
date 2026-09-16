@@ -18,6 +18,9 @@ const router = Router();
 router.get('/', getReviews);
 router.post('/', optionalAuth, validate(createReviewSchema), createReview);
 router.patch('/:id/status', protect, authorizeRoles(...STAFF_ROLES), validate(updateReviewStatusSchema), updateReviewStatus);
-router.delete('/:id', protect, authorizeRoles(ROLES.SUPER_ADMIN), deleteReview);
+router.put('/:id/status', protect, authorizeRoles(...STAFF_ROLES), validate(updateReviewStatusSchema), updateReviewStatus);
+router.delete('/:id', protect, authorizeRoles(...STAFF_ROLES), deleteReview);
 
 export default router;
+
+

@@ -4,6 +4,7 @@ import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import slugify from '../utils/slugify.js';
+import cleanUpdates from '../utils/cleanUpdates.js';
 import { STATUS_CODES } from '../constants/statusCodes.js';
 
 export const getCities = asyncHandler(async (req, res) => {
@@ -174,7 +175,7 @@ export const createCity = asyncHandler(async (req, res) => {
 
 export const updateCity = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const updates = { ...req.body };
+  const updates = cleanUpdates(req.body);
 
   if (updates.name && !updates.slug) {
     updates.slug = slugify(updates.name);
@@ -187,7 +188,11 @@ export const updateCity = asyncHandler(async (req, res) => {
     }
   }
 
-  const city = await City.findByIdAndUpdate(id, updates, {
+  const query = id.match(/^[0-9a-fA-F]{24}$/)
+    ? { _id: id }
+    : { slug: id.toLowerCase() };
+
+  const city = await City.findOneAndUpdate(query, updates, {
     new: true,
     runValidators: true
   });
@@ -203,7 +208,11 @@ export const updateCity = asyncHandler(async (req, res) => {
 
 export const deleteCity = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const city = await City.findByIdAndDelete(id);
+  const query = id.match(/^[0-9a-fA-F]{24}$/)
+    ? { _id: id }
+    : { slug: id.toLowerCase() };
+
+  const city = await City.findOneAndDelete(query);
 
   if (!city) {
     throw new ApiError(STATUS_CODES.NOT_FOUND, 'City not found');
@@ -215,3 +224,4 @@ export const deleteCity = asyncHandler(async (req, res) => {
     deletedId: id
   });
 });
+
