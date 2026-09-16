@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seeders/seed.js",
-    "sync-blogs": "node src/seeders/syncLiveBlogs.js"
+    "sync-blogs": "node src/seeders/migrateAllWordPressBlogs.js",
+    "migrate-blogs": "node src/seeders/migrateAllWordPressBlogs.js"
   },
 
   "keywords": [

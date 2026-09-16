@@ -15,6 +15,12 @@ const authorSchema = new mongoose.Schema(
 
 const blogSchema = new mongoose.Schema(
   {
+    wordpressId: {
+      type: Number,
+      unique: true,
+      sparse: true,
+      index: true
+    },
     title: {
       type: String,
       required: [true, 'Title is required'],
@@ -34,7 +40,7 @@ const blogSchema = new mongoose.Schema(
     content: {
       type: String,
       default: ''
-    }, // HTML or Markdown
+    }, // Full HTML content
     coverImage: {
       type: String,
       default: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=1200'
@@ -42,21 +48,37 @@ const blogSchema = new mongoose.Schema(
     category: {
       type: String,
       default: 'Travel Guide'
-    }, // e.g. "Travel Guide", "Food & Culture", "Heritage"
-    tags: [{
-      type: String
-    }],
+    }, // Primary category name
+    categories: [
+      {
+        id: { type: Number },
+        name: { type: String },
+        slug: { type: String }
+      }
+    ],
+    tags: [
+      {
+        type: String
+      }
+    ],
+    tagsDetails: [
+      {
+        id: { type: Number },
+        name: { type: String },
+        slug: { type: String }
+      }
+    ],
     author: {
       type: authorSchema,
       default: () => ({
-        name: 'Harshit Sharma',
+        name: 'Jodhpur Voyage',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
         role: 'Travel Specialist'
       })
     },
     readTime: {
       type: String,
-      default: '4 min read'
+      default: '5 min read'
     },
     views: {
       type: Number,
@@ -68,13 +90,20 @@ const blogSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Published', 'Draft'],
+      enum: ['Published', 'Draft', 'publish', 'draft'],
       default: 'Published',
       index: true
+    },
+    originalUrl: {
+      type: String,
+      default: ''
     },
     publishedAt: {
       type: Date,
       default: Date.now
+    },
+    modifiedAt: {
+      type: Date
     }
   },
   {

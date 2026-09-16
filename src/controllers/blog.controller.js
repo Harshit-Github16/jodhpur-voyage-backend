@@ -52,19 +52,24 @@ export const getBlogs = asyncHandler(async (req, res) => {
 
   const formatted = blogs.map((b) => ({
     id: b._id,
+    wordpressId: b.wordpressId,
     title: b.title,
     slug: b.slug,
     excerpt: b.excerpt,
     content: b.content || '',
     coverImage: b.coverImage,
     category: b.category,
+    categories: b.categories || [],
     tags: b.tags || [],
+    tagsDetails: b.tagsDetails || [],
     author: b.author,
     readTime: b.readTime,
     views: b.views || 0,
     featured: b.featured,
     status: b.status,
+    originalUrl: b.originalUrl,
     publishedAt: b.publishedAt,
+    modifiedAt: b.modifiedAt,
     createdAt: b.createdAt
   }));
 
@@ -192,14 +197,14 @@ export const deleteBlog = asyncHandler(async (req, res) => {
 });
 
 export const syncWordPress = asyncHandler(async (req, res) => {
-  const { syncWordPressBlogs } = await import('../seeders/syncLiveBlogs.js');
-  const blogs = await syncWordPressBlogs();
+  const { migrateAllWordPressBlogs } = await import('../seeders/migrateAllWordPressBlogs.js');
+  const stats = await migrateAllWordPressBlogs();
 
   return res.status(STATUS_CODES.OK).json(
     new ApiResponse(
       STATUS_CODES.OK,
-      { count: blogs?.length || 0 },
-      `Successfully synced ${blogs?.length || 0} live blogs from WordPress`
+      stats,
+      `Successfully completed migration. Fetched: ${stats.totalFetched}, Inserted: ${stats.insertedCount}, Updated: ${stats.updatedCount}, Failed: ${stats.failedCount}`
     )
   );
 });
