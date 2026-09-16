@@ -10,7 +10,7 @@ cloudinary.config({
 });
 
 
-export const uploadToCloudinary = (fileBuffer, folder = 'jodhpur_voyage/media', filename) => {
+export const uploadToCloudinary = (fileOrBuffer, folder = 'jodhpur_voyage/media', filename) => {
   return new Promise((resolve, reject) => {
     // If cloudinary is not configured with real credentials, return a fallback URL
     if (
@@ -24,7 +24,7 @@ export const uploadToCloudinary = (fileBuffer, folder = 'jodhpur_voyage/media', 
         url: mockUrl,
         public_id: `${folder}/${filename || Date.now()}`,
         format: 'webp',
-        bytes: fileBuffer.length
+        bytes: typeof fileOrBuffer === 'string' ? fileOrBuffer.length : fileOrBuffer.length
       });
     }
 
@@ -33,6 +33,25 @@ export const uploadToCloudinary = (fileBuffer, folder = 'jodhpur_voyage/media', 
       : 'img';
     const uniquePublicId = `${cleanName}_${Date.now()}`;
 
+    // Handle Base64 string or remote URL
+    if (typeof fileOrBuffer === 'string') {
+      cloudinary.uploader.upload(
+        fileOrBuffer,
+        {
+          folder,
+          public_id: uniquePublicId,
+          resource_type: 'image',
+          transformation: [{ quality: 'auto', fetch_format: 'auto' }]
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      return;
+    }
+
+    // Handle Buffer (from multer)
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder,
@@ -46,9 +65,10 @@ export const uploadToCloudinary = (fileBuffer, folder = 'jodhpur_voyage/media', 
       }
     );
 
-    uploadStream.end(fileBuffer);
+    uploadStream.end(fileOrBuffer);
   });
 };
 
 export default cloudinary;
+
 
