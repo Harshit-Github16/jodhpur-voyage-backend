@@ -1,14 +1,23 @@
 import { Router } from 'express';
 import { uploadSingle, uploadMultiple } from '../controllers/upload.controller.js';
-import { protect, authorizeRoles } from '../middlewares/auth.middleware.js';
+import { optionalAuth } from '../middlewares/auth.middleware.js';
 import { uploadSingleImage, uploadMultipleImages } from '../middlewares/upload.middleware.js';
-import { STAFF_ROLES } from '../constants/roles.js';
 
 const router = Router();
 
-router.use(protect, authorizeRoles(...STAFF_ROLES));
+// Allow authenticated staff as well as guests (for reviews/enquiry photos)
+router.use(optionalAuth);
 
+// Single image upload routes
+router.post('/', uploadSingleImage('image'), uploadSingle);
 router.post('/single', uploadSingleImage('image'), uploadSingle);
+router.post('/image', uploadSingleImage('image'), uploadSingle);
+router.post('/file', uploadSingleImage('image'), uploadSingle);
+
+// Multiple image upload routes
 router.post('/multiple', uploadMultipleImages('images', 10), uploadMultiple);
+router.post('/images', uploadMultipleImages('images', 10), uploadMultiple);
 
 export default router;
+
+

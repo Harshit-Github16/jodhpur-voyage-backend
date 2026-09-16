@@ -28,6 +28,24 @@ export const upload = multer({
 });
 
 
-export const uploadSingleImage = (fieldName = 'image') => upload.single(fieldName);
-export const uploadMultipleImages = (fieldName = 'images', maxCount = 10) =>
-  upload.array(fieldName, maxCount);
+export const uploadSingleImage = (fieldName = 'image') => (req, res, next) => {
+  upload.any()(req, res, (err) => {
+    if (err) return next(err);
+    if (req.files && req.files.length > 0) {
+      req.file = req.files.find((f) => f.fieldname === fieldName) || req.files[0];
+    }
+    next();
+  });
+};
+
+export const uploadMultipleImages = (fieldName = 'images', maxCount = 10) => (req, res, next) => {
+  upload.any()(req, res, (err) => {
+    if (err) return next(err);
+    if (req.files) {
+      const matched = req.files.filter((f) => f.fieldname === fieldName);
+      req.files = matched.length > 0 ? matched.slice(0, maxCount) : req.files.slice(0, maxCount);
+    }
+    next();
+  });
+};
+
