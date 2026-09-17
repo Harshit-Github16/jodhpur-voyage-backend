@@ -7,6 +7,8 @@ import bookingRoutes from './booking.routes.js';
 import enquiryRoutes from './enquiry.routes.js';
 import reviewRoutes from './review.routes.js';
 import blogRoutes from './blog.routes.js';
+import postRoutes from './post.routes.js';
+import commentaireRoutes from './commentaire.routes.js';
 import customerRoutes from './customer.routes.js';
 import teamRoutes from './team.routes.js';
 import settingRoutes from './setting.routes.js';
@@ -34,6 +36,8 @@ router.use('/bookings', bookingRoutes);
 router.use('/enquiries', enquiryRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/blogs', blogRoutes);
+router.use('/posts', postRoutes);
+router.use('/commentaires', commentaireRoutes);
 router.use('/', customerRoutes); // /customers and /users/staff
 router.use('/team', teamRoutes);
 router.use('/settings', settingRoutes);

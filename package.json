@@ -8,8 +8,11 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seeders/seed.js",
-    "sync-blogs": "node src/seeders/migrateAllWordPressBlogs.js",
-    "migrate-blogs": "node src/seeders/migrateAllWordPressBlogs.js"
+    "sync-posts": "node src/seeders/migrateAllWordPressData.js posts",
+    "sync-blogs": "node src/seeders/migrateAllWordPressData.js blogs",
+    "sync-commentaires": "node src/seeders/migrateAllWordPressData.js comms",
+    "sync-all": "node src/seeders/migrateAllWordPressData.js",
+    "reconciliation": "node src/seeders/migrateAllWordPressData.js report"
   },
 
   "keywords": [
