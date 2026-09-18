@@ -9,23 +9,32 @@ const teamSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      required: [true, 'Role is required']
-    }, // e.g., "Founder & Chief Explorer", "Lead Jodhpur Guide"
+      required: [true, 'Role is required'],
+      trim: true
+    }, // e.g., "Founder & Chief Explorer", "North India & Himalayan Travel Expert"
+    expertise: {
+      type: String,
+      trim: true,
+      default: ''
+    }, // e.g., "Rajasthan, Banaras, Ladakh, Spiti"
     bio: {
       type: String,
-      required: [true, 'Bio is required']
+      default: ''
     },
     image: {
       type: String,
-      required: [true, 'Image URL is required']
+      trim: true,
+      default: ''
     },
     order: {
       type: Number,
-      default: 0
+      default: 0,
+      index: true
     },
     experienceYears: {
       type: Number,
-      default: 5
+      min: 0,
+      default: 0
     },
     socials: {
       instagram: { type: String, default: '' },
@@ -35,7 +44,8 @@ const teamSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['Active', 'Inactive'],
-      default: 'Active'
+      default: 'Active',
+      index: true
     }
   },
   {

@@ -11,6 +11,7 @@ import postRoutes from './post.routes.js';
 import commentaireRoutes from './commentaire.routes.js';
 import customerRoutes from './customer.routes.js';
 import teamRoutes from './team.routes.js';
+import contentRoutes from './content.routes.js';
 import settingRoutes from './setting.routes.js';
 import analyticsRoutes from './analytics.routes.js';
 import uploadRoutes from './upload.routes.js';
@@ -40,6 +41,7 @@ router.use('/posts', postRoutes);
 router.use('/commentaires', commentaireRoutes);
 router.use('/', customerRoutes); // /customers and /users/staff
 router.use('/team', teamRoutes);
+router.use('/content', contentRoutes);
 router.use('/settings', settingRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/upload', uploadRoutes);

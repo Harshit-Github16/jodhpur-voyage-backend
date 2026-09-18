@@ -5,27 +5,39 @@ import asyncHandler from '../utils/asyncHandler.js';
 import cleanUpdates from '../utils/cleanUpdates.js';
 import { STATUS_CODES } from '../constants/statusCodes.js';
 
-
 export const getTeam = asyncHandler(async (req, res) => {
-  const team = await Team.find({ status: 'Active' }).sort({ order: 1, createdAt: 1 }).lean();
+  const { limit, sort } = req.query;
+
+  let query = Team.find({ status: 'Active' });
+
+  if (sort === 'createdAt') {
+    query = query.sort({ createdAt: -1 });
+  } else {
+    query = query.sort({ order: 1, createdAt: 1 });
+  }
+
+  if (limit && !isNaN(parseInt(limit, 10))) {
+    query = query.limit(parseInt(limit, 10));
+  }
+
+  const team = await query.lean();
 
   const formatted = team.map((t) => ({
     id: t._id,
     name: t.name,
     role: t.role,
-    bio: t.bio,
-    image: t.image,
-    experienceYears: t.experienceYears,
-    socials: t.socials,
-    order: t.order,
-    status: t.status
+    expertise: t.expertise || '',
+    bio: t.bio || '',
+    image: t.image || '',
+    experienceYears: t.experienceYears || 0,
+    socials: t.socials || {},
+    order: t.order || 0,
+    status: t.status || 'Active'
   }));
 
-  return res.status(STATUS_CODES.OK).json({
-    success: true,
-    count: formatted.length,
-    data: formatted
-  });
+  return res.status(STATUS_CODES.OK).json(
+    new ApiResponse(STATUS_CODES.OK, formatted, 'Team fetched successfully')
+  );
 });
 
 export const getTeamAdmin = asyncHandler(async (req, res) => {
@@ -35,38 +47,39 @@ export const getTeamAdmin = asyncHandler(async (req, res) => {
     id: t._id,
     name: t.name,
     role: t.role,
-    bio: t.bio,
-    image: t.image,
-    experienceYears: t.experienceYears,
-    socials: t.socials,
-    order: t.order,
-    status: t.status,
-    createdAt: t.createdAt
+    expertise: t.expertise || '',
+    bio: t.bio || '',
+    image: t.image || '',
+    experienceYears: t.experienceYears || 0,
+    socials: t.socials || {},
+    order: t.order || 0,
+    status: t.status || 'Active',
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt
   }));
 
-  return res.status(STATUS_CODES.OK).json({
-    success: true,
-    count: formatted.length,
-    data: formatted
-  });
+  return res.status(STATUS_CODES.OK).json(
+    new ApiResponse(STATUS_CODES.OK, formatted, 'Team fetched successfully')
+  );
 });
 
 export const createTeamMember = asyncHandler(async (req, res) => {
-  const { name, role, bio, image, experienceYears, socials, order, status } = req.body;
+  const { name, role, expertise, bio, image, experienceYears, socials, order, status } = req.body;
 
   const member = await Team.create({
     name,
     role,
-    bio,
-    image,
-    experienceYears: experienceYears || 5,
+    expertise: expertise || '',
+    bio: bio || '',
+    image: image || '',
+    experienceYears: typeof experienceYears === 'number' ? experienceYears : 0,
     socials: socials || {},
-    order: order || 0,
+    order: typeof order === 'number' ? order : 0,
     status: status || 'Active'
   });
 
   return res.status(STATUS_CODES.CREATED).json(
-    new ApiResponse(STATUS_CODES.CREATED, member, 'Team member added successfully')
+    new ApiResponse(STATUS_CODES.CREATED, member, 'Team member created successfully')
   );
 });
 
@@ -96,10 +109,7 @@ export const deleteTeamMember = asyncHandler(async (req, res) => {
     throw new ApiError(STATUS_CODES.NOT_FOUND, 'Team member not found');
   }
 
-  return res.status(STATUS_CODES.OK).json({
-    success: true,
-    message: 'Team member removed successfully',
-    deletedId: id
-  });
+  return res.status(STATUS_CODES.OK).json(
+    new ApiResponse(STATUS_CODES.OK, { id }, 'Team member deleted successfully')
+  );
 });
-

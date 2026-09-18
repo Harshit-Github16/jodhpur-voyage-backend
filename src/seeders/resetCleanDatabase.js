@@ -11,6 +11,7 @@ import Review from '../models/Review.js';
 import Blog from '../models/Blog.js';
 import Team from '../models/Team.js';
 import Setting from '../models/Setting.js';
+import WhoWeAreContent from '../models/WhoWeAreContent.js';
 import { ROLES } from '../constants/roles.js';
 
 dotenv.config();
@@ -29,7 +30,8 @@ export const resetCleanDatabase = async () => {
       Booking.deleteMany({}),
       Enquiry.deleteMany({}),
       Review.deleteMany({}),
-      Team.deleteMany({})
+      Team.deleteMany({}),
+      WhoWeAreContent.deleteMany({})
     ]);
 
     console.log('👤 Creating requested Super Admin User (admin@jodhpur.com / 12345678)...');
@@ -42,6 +44,9 @@ export const resetCleanDatabase = async () => {
       permissions: ['all'],
       status: 'Active'
     });
+
+    console.log('📄 Ensuring clean Who We Are Content...');
+    await WhoWeAreContent.getOrInitContent();
 
     console.log('⚙️ Ensuring clean Site Settings...');
     await Setting.deleteMany({});
