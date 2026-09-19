@@ -29,7 +29,7 @@
   "author": "Jodhpur Voyage Engineering Team",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^3.0.3",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
     "compression": "^1.8.2",
     "cookie-parser": "^1.4.7",
