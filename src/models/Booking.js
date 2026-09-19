@@ -112,5 +112,5 @@ bookingSchema.pre('validate', function (next) {
   next();
 });
 
-const Booking = mongoose.model('Booking', bookingSchema);
+const Booking = mongoose.models.Booking || mongoose.model('Booking', bookingSchema);
 export default Booking;

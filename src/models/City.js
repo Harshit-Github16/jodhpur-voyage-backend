@@ -105,5 +105,5 @@ citySchema.pre('validate', function (next) {
 // Text index for full-text search
 citySchema.index({ name: 'text', state: 'text', tagline: 'text', keywords: 'text' });
 
-const City = mongoose.model('City', citySchema);
+const City = mongoose.models.City || mongoose.model('City', citySchema);
 export default City;

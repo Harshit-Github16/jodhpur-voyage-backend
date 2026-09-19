@@ -58,5 +58,5 @@ destinationCategorySchema.pre('validate', function (next) {
   next();
 });
 
-const DestinationCategory = mongoose.model('DestinationCategory', destinationCategorySchema);
+const DestinationCategory = mongoose.models.DestinationCategory || mongoose.model('DestinationCategory', destinationCategorySchema);
 export default DestinationCategory;

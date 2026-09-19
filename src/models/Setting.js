@@ -39,5 +39,5 @@ settingSchema.statics.getSettings = async function () {
   return setting;
 };
 
-const Setting = mongoose.model('Setting', settingSchema);
+const Setting = mongoose.models.Setting || mongoose.model('Setting', settingSchema);
 export default Setting;

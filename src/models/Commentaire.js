@@ -106,5 +106,5 @@ commentaireSchema.pre('validate', function (next) {
 
 commentaireSchema.index({ title: 'text', content: 'text', excerpt: 'text' });
 
-const Commentaire = mongoose.model('Commentaire', commentaireSchema);
+const Commentaire = mongoose.models.Commentaire || mongoose.model('Commentaire', commentaireSchema);
 export default Commentaire;

@@ -148,5 +148,5 @@ tourSchema.index({ title: 'text', location: 'text', overview: 'text' });
 tourSchema.index({ price: 1, rating: -1 });
 tourSchema.index({ status: 1, category: 1 });
 
-const Tour = mongoose.model('Tour', tourSchema);
+const Tour = mongoose.models.Tour || mongoose.model('Tour', tourSchema);
 export default Tour;

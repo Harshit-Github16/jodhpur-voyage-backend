@@ -187,5 +187,5 @@ WhoWeAreContentSchema.statics.getOrInitContent = async function () {
   return doc;
 };
 
-const WhoWeAreContent = mongoose.model('WhoWeAreContent', WhoWeAreContentSchema);
+const WhoWeAreContent = mongoose.models.WhoWeAreContent || mongoose.model('WhoWeAreContent', WhoWeAreContentSchema);
 export default WhoWeAreContent;

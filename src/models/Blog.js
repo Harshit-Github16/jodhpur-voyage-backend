@@ -128,5 +128,5 @@ blogSchema.pre('validate', function (next) {
 
 blogSchema.index({ title: 'text', excerpt: 'text', tags: 'text' });
 
-const Blog = mongoose.model('Blog', blogSchema);
+const Blog = mongoose.models.Blog || mongoose.model('Blog', blogSchema);
 export default Blog;

@@ -128,5 +128,5 @@ postSchema.pre('validate', function (next) {
 
 postSchema.index({ title: 'text', excerpt: 'text', tags: 'text' });
 
-const Post = mongoose.model('Post', postSchema);
+const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 export default Post;
