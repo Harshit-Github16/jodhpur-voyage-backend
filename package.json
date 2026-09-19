@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Production REST API Backend for Jodhpur Voyage Luxury & Heritage Travel Platform",
   "type": "module",
-  "main": "src/server.js",
+  "main": "api/index.js",
   "engines": {
     "node": "20.x"
   },

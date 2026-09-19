@@ -1,7 +1,10 @@
+import app from '../src/app.js';
+
 export default function handler(req, res) {
-  res.status(200).json({
-    status: 'ok',
-    message: 'Jodhpur Voyage API Backend serverless function is working!',
-    timestamp: new Date().toISOString()
-  });
+  // Normalize Vercel rewritten URLs to match Express routes correctly
+  if (req.url === '/api/index.js' || req.url === '/api' || req.url.startsWith('/api/index')) {
+    const targetUrl = req.headers['x-forwarded-uri'] || req.headers['x-matched-path'];
+    req.url = targetUrl || '/';
+  }
+  return app(req, res);
 }
