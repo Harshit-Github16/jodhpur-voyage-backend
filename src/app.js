@@ -31,8 +31,12 @@ app.use(
 // Foolproof dynamic CORS configuration (supports credentials, all origins, all headers)
 const corsOptions = {
   origin: (origin, callback) => {
-    // Dynamically allow any origin that makes the request
-    return callback(null, origin || true);
+    // If request has no origin header (e.g. direct browser visit, curl, server-to-server), return '*'
+    if (!origin) {
+      return callback(null, '*');
+    }
+    // Allow any incoming origin dynamically
+    return callback(null, origin);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
