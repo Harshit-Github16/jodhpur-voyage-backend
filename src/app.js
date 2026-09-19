@@ -17,6 +17,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust reverse proxy (Vercel, Heroku, Cloudflare)
+app.set('trust proxy', 1);
+
 // Enable Response Compression (Gzip / Deflate) for blazing fast APIs
 app.use(compression());
 

@@ -19,17 +19,16 @@ const connectDB = async () => {
   }
 
   if (!cached.promise) {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/jodhpur_voyage';
+    const mongoUri = process.env.MONGO_URI || 'mongodb+srv://harshit0150:harshit0150@cluster0.y5z6n.mongodb.net/jodhpurvoyage?appName=Cluster0';
     
     cached.promise = mongoose
       .connect(mongoUri, {
-        maxPoolSize: 20,
-        minPoolSize: 2,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-        family: 4
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000
       })
       .then((mongooseInstance) => {
+        console.log('✅ MongoDB connected successfully');
         return mongooseInstance;
       })
       .catch((err) => {
