@@ -8,7 +8,6 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "npx esbuild api-entry.js --bundle --platform=node --target=node18 --outfile=api/index.js --format=esm",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "seed": "node src/seeders/seed.js",
