@@ -48,6 +48,19 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Ensure explicit CORS headers as a safe fallback for deployments
+app.use((req, res, next) => {
+  try {
+    const allowOrigin = process.env.FRONTEND_ORIGIN || '*';
+    res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  } catch (err) {
+    // ignore header set errors
+  }
+  next();
+});
+
 
 // Request Logging
 if (process.env.NODE_ENV === 'development') {
