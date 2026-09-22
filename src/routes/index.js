@@ -30,6 +30,7 @@ router.get('/health', (req, res) => {
 
 // Mount modules
 router.use('/auth', authRoutes);
+router.use('/', authRoutes); // direct /me, /login, etc.
 router.use('/destination-categories', categoryRoutes);
 router.use('/cities', cityRoutes);
 router.use('/tours', tourRoutes);
@@ -39,9 +40,10 @@ router.use('/reviews', reviewRoutes);
 router.use('/blogs', blogRoutes);
 router.use('/posts', postRoutes);
 router.use('/commentaires', commentaireRoutes);
-router.use('/', customerRoutes); // /customers and /users/staff
+router.use('/', customerRoutes); // /customers, /staff, and /users/staff
 router.use('/team', teamRoutes);
 router.use('/content', contentRoutes);
+router.use('/', contentRoutes); // direct /hero-slider, /who-we-are
 router.use('/settings', settingRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/upload', uploadRoutes);

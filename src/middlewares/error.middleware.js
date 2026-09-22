@@ -46,6 +46,15 @@ export const errorHandler = (err, req, res, next) => {
     error = new ApiError(statusCode, message, error?.errors || [], err.stack);
   }
 
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  res.setHeader('Vary', 'Origin');
+
   const response = {
     success: false,
     statusCode: error.statusCode,

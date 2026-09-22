@@ -18,6 +18,8 @@ router.get('/customers', protect, authorizeRoles(...ADMIN_ROLES), getCustomers);
 router.delete('/customers/:id', protect, authorizeRoles(...ADMIN_ROLES), deleteStaff);
 
 // Staff management
+router.get('/staff', protect, authorizeRoles(...ADMIN_ROLES), getStaffList);
+router.post('/staff', protect, authorizeRoles(...ADMIN_ROLES), validate(createStaffSchema), createStaff);
 router.get('/users/staff', protect, authorizeRoles(...ADMIN_ROLES), getStaffList);
 router.post('/users/staff', protect, authorizeRoles(...ADMIN_ROLES), validate(createStaffSchema), createStaff);
 router.patch('/users/:id/status', protect, authorizeRoles(...ADMIN_ROLES), toggleUserStatus);
