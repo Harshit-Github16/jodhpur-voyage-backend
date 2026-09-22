@@ -40,6 +40,8 @@ const corsOptions = {
     return callback(null, origin);
   },
   credentials: true,
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  exposedHeaders: ['Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
   optionsSuccessStatus: 200
 };
@@ -56,16 +58,19 @@ app.use((req, res, next) => {
     const allowOrigin = envOrigin ? envOrigin : (requestOrigin || '*');
 
     res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+    res.setHeader('Vary', 'Origin');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     // Only set credentials when we are reflecting a concrete origin (not '*')
     if (allowOrigin !== '*') {
       res.setHeader('Access-Control-Allow-Credentials', 'true');
     }
 
-    // Quickly respond to preflight
+    // Quickly respond to preflight with proper headers
     if (req.method === 'OPTIONS') {
-      return res.sendStatus(200);
+      res.statusCode = 204;
+      return res.end();
     }
   } catch (err) {
     // ignore header set errors
