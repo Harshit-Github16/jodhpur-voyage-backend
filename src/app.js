@@ -20,6 +20,16 @@ const app = express();
 // Trust reverse proxy (Vercel, Heroku, Cloudflare)
 app.set('trust proxy', 1);
 
+// Debug middleware: log origin/host for incoming requests (temporary)
+app.use((req, res, next) => {
+  try {
+    console.log('[CORS DEBUG] origin=%s host=%s url=%s method=%s', req.headers.origin, req.headers.host, req.originalUrl, req.method);
+  } catch (err) {
+    // ignore
+  }
+  next();
+});
+
 // Enable Response Compression (Gzip / Deflate) for blazing fast APIs
 app.use(compression());
 
@@ -31,49 +41,50 @@ app.use(
   })
 );
 
-// Dynamic CORS configuration that reflects the actual request origin
+// Global CORS Options
 const corsOptions = {
   origin: (origin, callback) => {
-    // If request has no origin header (server-to-server or curl), allow it
-    if (!origin) return callback(null, true);
-    // Reflect the origin back to the browser so credentials can be used
-    return callback(null, origin);
+    // Dynamically allow the requesting origin (reflect origin)
+    // This supports localhost, Vercel deployments, production domains, and server-to-server requests
+    callback(null, true);
   },
   credentials: true,
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  exposedHeaders: ['Authorization'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers'
+  ],
+  exposedHeaders: ['Authorization'],
   optionsSuccessStatus: 200
 };
 
+// Enable CORS for all routes
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
-// Explicit CORS fallback for environments where headers must be set manually.
-// Important: when using credentials, Access-Control-Allow-Origin must NOT be '*'.
+// Extra CORS headers safeguard to guarantee headers on all responses & preflights
 app.use((req, res, next) => {
-  try {
-    const envOrigin = process.env.FRONTEND_ORIGIN;
-    const requestOrigin = req.headers.origin;
-    // Prefer configured FRONTEND_ORIGIN; otherwise reflect the request origin if present.
-    const allowOrigin = envOrigin ? envOrigin : (requestOrigin || '*');
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers');
+  res.setHeader('Access-Control-Expose-Headers', 'Authorization');
 
-    res.setHeader('Access-Control-Allow-Origin', allowOrigin);
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-    // Only set credentials when we are reflecting a concrete origin (not '*')
-    if (allowOrigin !== '*') {
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-
-    // Quickly respond to preflight with proper headers
-    if (req.method === 'OPTIONS') {
-      res.statusCode = 204;
-      return res.end();
-    }
-  } catch (err) {
-    // ignore header set errors
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
   next();
 });
@@ -123,6 +134,7 @@ app.use(async (req, res, next) => {
 
 // API Routes Mounting
 app.use('/api/v1', apiRouter);
+app.use('/api', apiRouter);
 
 // 404 Catch-all handler
 app.use(notFound);
