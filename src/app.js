@@ -31,14 +31,12 @@ app.use(
   })
 );
 
-// Foolproof dynamic CORS configuration (supports credentials, all origins, all headers)
+// Dynamic CORS configuration that reflects the actual request origin
 const corsOptions = {
   origin: (origin, callback) => {
-    // If request has no origin header (e.g. direct browser visit, curl, server-to-server), return '*'
-    if (!origin) {
-      return callback(null, '*');
-    }
-    // Allow any incoming origin dynamically
+    // If request has no origin header (server-to-server or curl), allow it
+    if (!origin) return callback(null, true);
+    // Reflect the origin back to the browser so credentials can be used
     return callback(null, origin);
   },
   credentials: true,
@@ -48,13 +46,27 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Ensure explicit CORS headers as a safe fallback for deployments
+// Explicit CORS fallback for environments where headers must be set manually.
+// Important: when using credentials, Access-Control-Allow-Origin must NOT be '*'.
 app.use((req, res, next) => {
   try {
-    const allowOrigin = process.env.FRONTEND_ORIGIN || '*';
+    const envOrigin = process.env.FRONTEND_ORIGIN;
+    const requestOrigin = req.headers.origin;
+    // Prefer configured FRONTEND_ORIGIN; otherwise reflect the request origin if present.
+    const allowOrigin = envOrigin ? envOrigin : (requestOrigin || '*');
+
     res.setHeader('Access-Control-Allow-Origin', allowOrigin);
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    // Only set credentials when we are reflecting a concrete origin (not '*')
+    if (allowOrigin !== '*') {
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+
+    // Quickly respond to preflight
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
   } catch (err) {
     // ignore header set errors
   }
